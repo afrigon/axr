@@ -5,3 +5,11 @@ pkg/
 *.pkg.tar.zst
 *.tar.gz
 *.log
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+.terraform.lock.hcl
