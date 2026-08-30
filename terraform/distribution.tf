@@ -51,6 +51,16 @@ resource "aws_cloudfront_distribution" "mirror" {
   }
 
   ordered_cache_behavior {
+    path_pattern               = "/axr-keyring*"
+    target_origin_id           = "s3"
+    viewer_protocol_policy     = "redirect-to-https"
+    allowed_methods            = ["GET", "HEAD"]
+    cached_methods             = ["GET", "HEAD"]
+    cache_policy_id            = data.aws_cloudfront_cache_policy.disabled.id
+    response_headers_policy_id = data.aws_cloudfront_response_headers_policy.security.id
+  }
+
+  ordered_cache_behavior {
     path_pattern               = "/x86_64/axr.files*"
     target_origin_id           = "s3"
     viewer_protocol_policy     = "redirect-to-https"

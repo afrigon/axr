@@ -79,7 +79,9 @@ jobs:
       - name: Publish missing packages
         env:
           BUCKET: ${{ needs.terraform.outputs.bucket }}
+          AXR_SIGNING_KEY: ${{ secrets.AXR_SIGNING_KEY }}
         run: |
+          gpg --batch --import <<< "$AXR_SIGNING_KEY"
           mirror="s3://$BUCKET/x86_64"
           staging=/home/builder/staging
           mkdir "$staging"
@@ -119,7 +121,7 @@ jobs:
               $1 == "arch" { arch = $3 }
               END { print pkgname "-" pkgver "-" pkgrel "-" arch ".pkg.tar.zst" }
             ' <<< "$srcinfo")
-            if ! grep -qxF "$file" <<< "$published"; then
+            if ! grep -qxF "$file" <<< "$published" || ! grep -qxF "$file.sig" <<< "$published"; then
               build "$name"
               cp "/home/builder/$name/$file" "$staging/$file"
               new_files="$new_files $file"
@@ -132,12 +134,26 @@ jobs:
           fi
 
           cd "$staging"
-          repo-add axr.db.tar.gz $new_files
+          for file in $new_files; do
+            gpg --batch --yes --detach-sign "$file"
+          done
+          repo-add --sign axr.db.tar.gz $new_files
 
           for file in $new_files; do
             aws s3 cp "$file" "$mirror/$file" --cache-control "public, max-age=2592000"
+            aws s3 cp "$file.sig" "$mirror/$file.sig" --cache-control "public, max-age=2592000"
           done
           aws s3 cp axr.db.tar.gz "$mirror/axr.db.tar.gz" --cache-control no-cache
           aws s3 cp axr.db.tar.gz "$mirror/axr.db" --cache-control no-cache
+          aws s3 cp axr.db.tar.gz.sig "$mirror/axr.db.tar.gz.sig" --cache-control no-cache
+          aws s3 cp axr.db.tar.gz.sig "$mirror/axr.db.sig" --cache-control no-cache
           aws s3 cp axr.files.tar.gz "$mirror/axr.files.tar.gz" --cache-control no-cache
           aws s3 cp axr.files.tar.gz "$mirror/axr.files" --cache-control no-cache
+          aws s3 cp axr.files.tar.gz.sig "$mirror/axr.files.tar.gz.sig" --cache-control no-cache
+          aws s3 cp axr.files.tar.gz.sig "$mirror/axr.files.sig" --cache-control no-cache
+
+          keyring=$(find . -name "axr-keyring-*.pkg.tar.zst" -printf "%f\n" | head -1)
+          if [ -n "$keyring" ]; then
+            aws s3 cp "$keyring" "s3://$BUCKET/axr-keyring.pkg.tar.zst" --cache-control no-cache
+            aws s3 cp "$keyring.sig" "s3://$BUCKET/axr-keyring.pkg.tar.zst.sig" --cache-control no-cache
+          fi

@@ -1,0 +1,19 @@
+# Maintainer: Alexandre Frigon <alexandre.frigon.1@gmail.com>
+pkgname=axr-keyring
+pkgver=1
+pkgrel=1
+pkgdesc="AXR PGP keyring"
+arch=('any')
+url="https://github.com/afrigon/axr"
+license=('CC0-1.0')
+install=axr-keyring.install
+source=('axr.gpg' 'axr-trusted' 'axr-revoked')
+sha256sums=('fa4071ad80234b8e1673459d2773e0d13ba5a59ce9a18163403cb8e880f64cb8'
+            '173a3c371088b5c42776fba722bb646b0cb23bd44f5b505afc5450f453cb2721'
+            'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855')
+
+package() {
+  install -Dm644 axr.gpg "$pkgdir/usr/share/pacman/keyrings/axr.gpg"
+  install -Dm644 axr-trusted "$pkgdir/usr/share/pacman/keyrings/axr-trusted"
+  install -Dm644 axr-revoked "$pkgdir/usr/share/pacman/keyrings/axr-revoked"
+}
