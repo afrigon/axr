@@ -5,9 +5,11 @@ packages for my personal machines.
 
 ## Using the repository
 
-Install the keyring:
+Trust the signing key and install the keyring:
 
 ```sh
+sudo pacman-key --recv-key 50348DB24B2AE82D6B46D9D555F27928838BC19E --keyserver keyserver.ubuntu.com
+sudo pacman-key --lsign-key 50348DB24B2AE82D6B46D9D555F27928838BC19E
 sudo pacman -U https://axr.frigon.app/axr-keyring.pkg.tar.zst
 ```
 
