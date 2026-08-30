@@ -1,0 +1,16 @@
+# Maintainer: Alexandre Frigon <alexandre.frigon.1@gmail.com>
+pkgname=setup-xehos
+pkgver=0.1.1
+pkgrel=1
+pkgdesc="Bootstrap for my personal machines"
+arch=('any')
+url="https://github.com/afrigon/setup-xehos"
+license=('MIT')
+depends=('base-xehos')
+source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
+sha256sums=('d910ff031cf0ba90dbf1a1d8430127cbfd650e0b749f708a63a3745e269e57a5')
+
+package() {
+  install -Dm755 "$pkgname-$pkgver/setup-xehos" "$pkgdir/usr/bin/setup-xehos"
+  install -Dm644 "$pkgname-$pkgver/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

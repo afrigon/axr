@@ -1,0 +1,71 @@
+name: check
+
+on:
+  pull_request:
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.diff.outputs.packages }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Detect changed packages
+        id: diff
+        run: |
+          packages=$(
+            git diff --name-only "origin/$GITHUB_BASE_REF"...HEAD -- packages/ \
+              | cut -d/ -f2 \
+              | sort -u \
+              | while read -r name; do [ -d "packages/$name" ] && echo "$name"; done \
+              | jq --raw-input . | jq --compact-output --slurp .
+          )
+          echo "packages=$packages" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: discover
+    if: needs.discover.outputs.packages != '[]'
+    runs-on: ubuntu-latest
+    container: archlinux:base-devel
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJSON(needs.discover.outputs.packages) }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Prepare build user
+        run: |
+          pacman -Syu --noconfirm git namcap
+          useradd --create-home builder
+          echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
+      - name: Bootstrap paru
+        run: |
+          sudo -Hu builder git clone https://aur.archlinux.org/paru.git /home/builder/paru
+          cd /home/builder/paru
+          sudo -Hu builder makepkg --syncdeps --install --noconfirm
+      - name: Build and install
+        env:
+          PACKAGE: ${{ matrix.package }}
+        run: |
+          build() {
+            local name="$1"
+            cp -r "packages/$name" "/home/builder/$name"
+            chown -R builder:builder "/home/builder/$name"
+            local dep
+            for dep in $(cd "/home/builder/$name" && sudo -Hu builder makepkg --printsrcinfo | awk '$1 == "depends" { print $3 }'); do
+              if [ -d "packages/$dep" ] && [ ! -d "/home/builder/$dep" ]; then
+                build "$dep"
+              fi
+            done
+            (cd "/home/builder/$name" && sudo -Hu builder paru -Ui --noconfirm)
+          }
+          build "$PACKAGE"
+      - name: Lint
+        env:
+          PACKAGE: ${{ matrix.package }}
+        run: |
+          output=$(namcap "packages/$PACKAGE/PKGBUILD" /home/builder/"$PACKAGE"/*.pkg.tar.zst)
+          echo "$output"
+          ! grep -q ' E: ' <<< "$output"

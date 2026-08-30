@@ -1,0 +1,50 @@
+# Maintainer: Alexandre Frigon <alexandre.frigon.1@gmail.com>
+pkgname=base-xehos
+pkgver=1
+pkgrel=1
+pkgdesc="System layer for my personal machines"
+arch=('any')
+url="https://github.com/afrigon/axr"
+license=('CC0-1.0')
+depends=(
+  # session
+  'hyprland'
+  'uwsm'
+  'xdg-desktop-portal-hyprland'
+  'qt6-wayland'
+  'wl-clipboard'
+  'grim'
+  'slurp'
+  'matugen'
+  'dms-shell'
+  # audio
+  'pipewire'
+  'pipewire-alsa'
+  'pipewire-pulse'
+  'pipewire-jack'
+  'wireplumber'
+  # network
+  'networkmanager'
+  # shell and bootstrap
+  'fish'
+  'git'
+  'stow'
+  'mise'
+  'neovim'
+  # applications
+  'firefox'
+  'ghostty'
+  'mpv'
+  # fonts
+  'noto-fonts'
+  'noto-fonts-cjk'
+  'noto-fonts-emoji'
+  'inter-font'
+  'ttf-jetbrains-mono-nerd'
+  # utilities
+  'fastfetch'
+  'unzip'
+  '7zip'
+  'wget'
+  'tree'
+)
