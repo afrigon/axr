@@ -7,6 +7,7 @@ on:
     paths:
       - "packages/**"
       - "terraform/**"
+      - "mise.toml"
       - ".github/workflows/publish.yml"
   workflow_dispatch:
 
@@ -36,14 +37,10 @@ jobs:
           role-to-assume: ${{ env.AWS_ROLE }}
           role-session-name: axr-ci-session
 
-      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
 
       - name: Apply
-        working-directory: ./terraform
-        run: |
-          terraform init
-          terraform plan -out=planout
-          terraform apply planout
+        run: mise run deploy
 
       - name: Outputs
         id: outputs
