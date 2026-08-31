@@ -17,9 +17,9 @@ run = 'namcap "packages/$usage_package/PKGBUILD"'
 
 [tasks.deploy]
 description = "Apply the terraform infrastructure"
-run = '''
-cd terraform
-terraform init
-terraform plan -out=planout
-terraform apply planout
-'''
+dir = "terraform"
+run = [
+  "terraform init",
+  "terraform plan -out=planout",
+  "terraform apply planout",
+]
