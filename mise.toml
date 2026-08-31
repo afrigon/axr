@@ -9,7 +9,7 @@ description = "Build a package with makepkg"
 usage = '''
 arg "<package>" help="name of the directory under packages/"
 '''
-run = 'cd "packages/$usage_package" && makepkg --syncdeps'
+run = 'cd "packages/$usage_package" && makepkg --syncdeps --force'
 
 [tasks.lint]
 description = "Lint a package with namcap"
