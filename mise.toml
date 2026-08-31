@@ -1,0 +1,25 @@
+[tools]
+terraform = "1.16.0"
+
+[tasks.build]
+description = "Build a package with makepkg"
+usage = '''
+arg "<package>" help="name of the directory under packages/"
+'''
+run = 'cd "packages/$usage_package" && makepkg --syncdeps'
+
+[tasks.lint]
+description = "Lint a package with namcap"
+usage = '''
+arg "<package>" help="name of the directory under packages/"
+'''
+run = 'namcap "packages/$usage_package/PKGBUILD"'
+
+[tasks.deploy]
+description = "Apply the terraform infrastructure"
+dir = "terraform"
+run = [
+  "terraform init",
+  "terraform plan -out=planout",
+  "terraform apply planout",
+]
