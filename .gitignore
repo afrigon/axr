@@ -1,5 +1,8 @@
 .DS_Store
 .claude
+.env
+.env.*
+!.env.example
 src/
 pkg/
 *.pkg.tar.zst
